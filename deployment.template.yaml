@@ -2,15 +2,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: boardgame-deployment
+  labels:
+    app.kubernetes.io/name: boardgame
+    app.kubernetes.io/version: "1.0"  # Update version dynamically as needed
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: boardgame
-  replicas: 3
   template:
     metadata:
       labels:
         app: boardgame
+        app.kubernetes.io/name: boardgame
+        app.kubernetes.io/version: "1.0"  # Same as above
     spec:
       containers:
         - name: boardgame
@@ -18,7 +23,29 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
-              
+          readinessProbe:
+            httpGet:
+              path: /health           # Your app's health check endpoint
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health           # Your app's health check endpoint
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 5
+            timeoutSeconds: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
 ---
 apiVersion: v1 
 kind: Service
@@ -28,7 +55,7 @@ spec:
   selector:
     app: boardgame
   ports:
-    - protocol: "TCP"
+    - protocol: TCP
       port: 80
       targetPort: 8080 
-  type: LoadBalancer # type of service.
+  type: LoadBalancer
