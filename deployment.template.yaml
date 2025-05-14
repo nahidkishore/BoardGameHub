@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: boardgame
-          image: nahid0002/boardgame:latest
+          image: ${IMAGE_NAME}
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -23,7 +23,7 @@ spec:
 apiVersion: v1 
 kind: Service
 metadata: 
-  name: boardgame-ssvc
+  name: boardgame-svc
 spec:
   selector:
     app: boardgame
